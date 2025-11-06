@@ -57,7 +57,7 @@ core["month_name"] = core["data"].dt.strftime("%b")
 # =========================
 # FILTRE LATERALE
 # =========================
-st.sidebar.header("🔎 Filtre globale")
+st.sidebar.header("Filtre")
 
 genuri = ["Toate"] + sorted(core["gen"].dropna().unique().tolist())
 orase = ["Toate"] + sorted(core["oras"].dropna().unique().tolist())
