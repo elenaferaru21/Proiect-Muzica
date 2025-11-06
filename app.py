@@ -26,8 +26,8 @@ def run_query(query):
 # ===============================
 # INTERFAȚĂ PRINCIPALĂ
 # ===============================
-st.set_page_config(page_title="Dashboard Vânzări Muzicale", layout="wide")
-st.title("🎶 Dashboard Analiză Vânzări Muzicale")
+st.set_page_config(page_title="Dashboard vânzări muzicale", layout="wide")
+st.title("Dashboard analiză vânzări muzicale")
 
 menu = st.sidebar.selectbox(
     "Alege secțiunea:",
