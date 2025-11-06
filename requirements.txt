@@ -1,0 +1,8 @@
+streamlit
+pandas
+psycopg2
+matplotlib
+seaborn
+scikit-learn
+xlsxwriter
+numpy
