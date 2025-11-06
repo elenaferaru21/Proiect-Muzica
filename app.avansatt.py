@@ -28,8 +28,8 @@ def run_query(query, params=None):
 # =========================
 # SETĂRI PAGINĂ
 # =========================
-st.set_page_config(page_title="Dashboard Muzică", layout="wide")
-st.title("🎶 Dashboard Muzică – Advanced (2023)")
+st.set_page_config(page_title="Dashboard muzică", layout="wide")
+st.title("Dashboard muzică")
 
 # =========================
 # ÎNCĂRCARE DATE DE BAZĂ (FACT)
@@ -89,10 +89,10 @@ if oras_sel != "Toate":
 # KPI-URI
 # =========================
 col1, col2, col3, col4 = st.columns(4)
-col1.metric("💰 Vânzări filtrate (RON)", round(float(f["total"].sum()), 2))
-col2.metric("🛒 Nr. linii vânzare", int(f.shape[0]))
-col3.metric("🎧 Genuri unice", int(f["gen"].nunique()))
-col4.metric("🏬 Orașe unice", int(f["oras"].nunique()))
+col1.metric("Vânzări filtrate (RON)", round(float(f["total"].sum()), 2))
+col2.metric("Nr. linii vânzare", int(f.shape[0]))
+col3.metric("Genuri unice", int(f["gen"].nunique()))
+col4.metric("Orașe unice", int(f["oras"].nunique()))
 
 # =========================
 # MENIU ANALIZE
@@ -187,7 +187,7 @@ elif view == "Evoluția vânzărilor pe luni":
         st.pyplot(fig)
 
         # Heatmap gen x lună
-        st.markdown("### 🔥 Heatmap gen x lună")
+        st.markdown("### Heatmap gen x lună")
         piv = df.copy()
         piv["luna_num"] = piv["luna"].dt.month
         heat = piv.pivot_table(values="totalvanzari", index="genmuzical", columns="luna_num",
@@ -217,7 +217,7 @@ elif view == "Necesar aprovizionare (suport)":
 # =========================
 # 4) EVENIMENTE (±3 ZILE)
 # =========================
-elif view == "Evenimente (fereastră ±3 zile)":
+elif view == "Evenimente (±3 zile)":
     q = """
     SELECT 
         e.Nume AS Eveniment,
@@ -362,7 +362,7 @@ elif view == "Profitabilitate gen x oraș":
 # 10) PREDICȚIE & COMPARARE
 # =========================
 elif view == "Predicție & Comparare":
-    st.subheader("📈 Predicție simplă (regresie liniară) + comparare între luni")
+    st.subheader("Predicție simplă (regresie liniară) + comparare între luni")
 
     # agregare lunară globală pe filtrul curent
     df = f.groupby("luna", as_index=False)["total"].sum().rename(columns={"total": "totalvanzari"})
@@ -410,7 +410,7 @@ elif view == "Predicție & Comparare":
     else:
         st.warning("Ai nevoie de cel puțin 3 luni de date în intervalul selectat pentru a calcula o predicție.")
 
-    st.markdown("### 📊 Comparare între luni (bar chart)")
+    st.markdown("###Comparare între luni (bar chart)")
     if not df.empty:
         df_bar = f.groupby(f["data"].dt.month, as_index=False)["total"].sum().rename(columns={"data": "luna_idx", "total": "totalvanzari"})
         df_bar = df_bar.rename(columns={"data": "luna_idx", 0: "luna_idx"})
