@@ -28,7 +28,7 @@ def run_query(query, params=None):
 # =========================
 # SETĂRI PAGINĂ
 # =========================
-st.set_page_config(page_title="Dashboard Muzică – Advanced", layout="wide")
+st.set_page_config(page_title="Dashboard Muzică", layout="wide")
 st.title("🎶 Dashboard Muzică – Advanced (2023)")
 
 # =========================
