@@ -5,7 +5,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from io import BytesIO
-from sklearn.linear_model import LinearRegression
 
 # =========================
 # CONFIG BAZĂ DE DATE
@@ -132,7 +131,7 @@ def export_downloads(df, filename_prefix="export"):
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
     except Exception:
-        c2.info("Pentru Excel, instalează opțional pachetul `xlsxwriter`.")
+        c2.info("Pentru Excel, instalează `xlsxwriter`.")
 
 # =========================
 # 1) ASOCIERI VÂNZĂRI–GENURI
@@ -148,9 +147,7 @@ if view == "Asocieri vânzări-genuri":
         END AS GrupVarsta,
         c.NivelStudii,
         cat.Nume AS GenMuzical,
-        SUM(d.TotalLinie) AS TotalVanzari,
-        MIN(co.DataComanda) AS DMin,
-        MAX(co.DataComanda) AS DMax
+        SUM(d.TotalLinie) AS TotalVanzari
     FROM Client c
     JOIN Comanda co ON c.ClientID = co.ClientID
     JOIN DetaliuComanda d ON co.ComandaID = d.ComandaID
@@ -163,7 +160,6 @@ if view == "Asocieri vânzări-genuri":
     df = run_query(q, {"start": start_date, "end": end_date})
     st.dataframe(df)
     export_downloads(df, "asocieri")
-
     if not df.empty:
         fig, ax = plt.subplots(figsize=(10, 5))
         sns.barplot(data=df, x="genmuzical", y="totalvanzari", hue="grupvarsta", ax=ax)
@@ -171,12 +167,10 @@ if view == "Asocieri vânzări-genuri":
         st.pyplot(fig)
 
 # =========================
-# 2) EVOLUȚIA VÂNZĂRILOR PE LUNI
+# 2) EVOLUȚIA VÂNZĂRILOR PE LUNI (cu Min/Max colorat)
 # =========================
 elif view == "Evoluția vânzărilor pe luni":
-    df = f.groupby(["luna", "gen"], as_index=False)["total"].sum() \
-          .rename(columns={"total": "totalvanzari", "gen": "genmuzical"})
-
+    df = f.groupby(["luna", "gen"], as_index=False)["total"].sum().rename(columns={"total": "totalvanzari", "gen": "genmuzical"})
     st.dataframe(df.sort_values("luna"))
     export_downloads(df, "evolutie_lunara")
 
@@ -184,31 +178,41 @@ elif view == "Evoluția vânzărilor pe luni":
         fig, ax = plt.subplots(figsize=(10, 5))
         sns.lineplot(data=df, x="luna", y="totalvanzari", hue="genmuzical", marker="o", ax=ax)
         plt.xticks(rotation=45)
+
+        # Highlight Min & Max per gen
+        for g in df["genmuzical"].unique():
+            sub = df[df["genmuzical"] == g]
+            if sub.empty: continue
+            min_row = sub.loc[sub["totalvanzari"].idxmin()]
+            max_row = sub.loc[sub["totalvanzari"].idxmax()]
+            ax.scatter(min_row["luna"], min_row["totalvanzari"], color="red", s=120)
+            ax.scatter(max_row["luna"], max_row["totalvanzari"], color="green", s=120)
+
         st.pyplot(fig)
 
-        # Heatmap gen x lună
-        st.markdown("### Heatmap gen x lună")
-        piv = df.copy()
-        piv["luna_num"] = piv["luna"].dt.month
-        heat = piv.pivot_table(values="totalvanzari", index="genmuzical", columns="luna_num",
-                               aggfunc="sum", fill_value=0)
-        fig2, ax2 = plt.subplots(figsize=(10, 6))
-        sns.heatmap(heat, annot=False, ax=ax2)
-        ax2.set_xlabel("Luna (1–12)")
-        st.pyplot(fig2)
+        # Tabel Min/Max
+        rez = []
+        for g in df["genmuzical"].unique():
+            sub = df[df["genmuzical"] == g]
+            rez.append({
+                "Gen muzical": g,
+                "Luna MIN": sub.loc[sub["totalvanzari"].idxmin()]["luna"],
+                "Valoare MIN": sub["totalvanzari"].min(),
+                "Luna MAX": sub.loc[sub["totalvanzari"].idxmax()]["luna"],
+                "Valoare MAX": sub["totalvanzari"].max()
+            })
+        st.markdown("### 📌 Puncte Minime și Maxime Identificate")
+        st.dataframe(pd.DataFrame(rez))
 
 # =========================
 # 3) NECESAR APROVIZIONARE
 # =========================
 elif view == "Necesar aprovizionare (suport)":
     df = f.groupby("suport", as_index=False).agg(totalvandut=("cantitate", "sum"))
-    # aproximație: necesar pentru o lună pe baza intensității intervalului selectat + buffer 15%
     zile = max((pd.to_datetime(end_date) - pd.to_datetime(start_date)).days, 1)
     df["necesarestimativ"] = (df["totalvandut"] / zile * 30 * 1.15).round(0)
-
     st.dataframe(df)
     export_downloads(df, "necesar_aprovizionare")
-
     if not df.empty:
         fig, ax = plt.subplots(figsize=(7, 4))
         sns.barplot(data=df, x="suport", y="necesarestimativ", ax=ax)
@@ -234,12 +238,12 @@ elif view == "Evenimente (±3 zile)":
     df = run_query(q, {"start": start_date, "end": end_date})
     st.dataframe(df)
     export_downloads(df, "evenimente")
-
     if not df.empty:
         fig, ax = plt.subplots(figsize=(10, 4))
         sns.barplot(data=df, x="eveniment", y="totalvanzari", ax=ax)
         plt.xticks(rotation=45)
         st.pyplot(fig)
+
 # =========================
 # 5) IMPACT PROMOȚII (ESTIMARE)
 # =========================
@@ -264,23 +268,18 @@ elif view == "Impact promoții (estimare)":
     df = run_query(q, {"start": start_date, "end": end_date})
     st.dataframe(df)
     export_downloads(df, "impact_promotii")
-
     if not df.empty:
         fig, ax = plt.subplots(figsize=(10, 4))
-        sns.scatterplot(data=df, x="reducereprocent", y="totalvanzariestimate",
-                        hue="genmuzical", s=120, ax=ax)
+        sns.scatterplot(data=df, x="reducereprocent", y="totalvanzariestimate", hue="genmuzical", s=120, ax=ax)
         st.pyplot(fig)
 
 # =========================
 # 6) TOP PRODUSE (DUPĂ GEN)
 # =========================
 elif view == "Top produse (după gen)":
-    # top la nivel de GEN (din filtrul curent)
-    df = f.groupby(["gen"], as_index=False)["cantitate"].sum() \
-          .rename(columns={"cantitate": "totalvandut"})
+    df = f.groupby(["gen"], as_index=False)["cantitate"].sum().rename(columns={"cantitate": "totalvandut"})
     st.dataframe(df.sort_values("totalvandut", ascending=False))
     export_downloads(df, "top_produse_pe_gen")
-
     if not df.empty:
         fig, ax = plt.subplots(figsize=(10, 4))
         sns.barplot(data=df, x="gen", y="totalvandut", ax=ax)
@@ -308,7 +307,6 @@ elif view == "Vânzări medii pe client":
     df = run_query(q, {"start": start_date, "end": end_date})
     st.dataframe(df)
     export_downloads(df, "vanzari_medii_client")
-
     if not df.empty:
         fig, ax = plt.subplots(figsize=(10, 4))
         sns.barplot(data=df, x="numeclient", y="vanzaremediepercomanda", ax=ax)
@@ -337,21 +335,19 @@ elif view == "Clienți fideli (>=5 comenzi)":
     df = run_query(q, {"start": start_date, "end": end_date})
     st.dataframe(df)
     export_downloads(df, "clienti_fideli")
-
     if not df.empty:
         fig, ax = plt.subplots(figsize=(10, 5))
         sns.barplot(data=df, x="client", y="totalvanzari", ax=ax)
         plt.xticks(rotation=45)
         st.pyplot(fig)
+
 # =========================
 # 9) PROFITABILITATE GEN x ORAȘ
 # =========================
 elif view == "Profitabilitate gen x oraș":
-    df = f.groupby(["gen", "oras"], as_index=False)["total"].sum() \
-          .rename(columns={"total": "totalvanzari"})
+    df = f.groupby(["gen", "oras"], as_index=False)["total"].sum().rename(columns={"total": "totalvanzari"})
     st.dataframe(df.sort_values("totalvanzari", ascending=False))
     export_downloads(df, "profit_gen_oras")
-
     if not df.empty:
         fig, ax = plt.subplots(figsize=(10, 5))
         sns.barplot(data=df, x="gen", y="totalvanzari", hue="oras", ax=ax)
@@ -359,63 +355,42 @@ elif view == "Profitabilitate gen x oraș":
         st.pyplot(fig)
 
 # =========================
-# 10) PREDICȚIE & COMPARARE
+# 10) PREVIZIUNE ISTORICĂ
 # =========================
 elif view == "Predicție & Comparare":
-    st.subheader("Predicție simplă (regresie liniară) + comparare între luni")
+    st.subheader("🔮 Predicție bazată pe istoric (media ultimelor 3 luni)")
 
-    # agregare lunară globală pe filtrul curent
     df = f.groupby("luna", as_index=False)["total"].sum().rename(columns={"total": "totalvanzari"})
-    st.dataframe(df.sort_values("luna"))
-    export_downloads(df, "serie_lunara_filtrata")
+    df = df.sort_values("luna")
 
     if df.shape[0] >= 3:
-        # pregătim X, y (index lunar 1..n)
-        df = df.sort_values("luna").reset_index(drop=True)
-        df["t"] = np.arange(1, len(df) + 1)
-        X = df[["t"]].values
-        y = df["totalvanzari"].values
-
-        model = LinearRegression()
-        model.fit(X, y)
-
-        # prezicem următoarele 3 luni, dar capăm să rămânem în 2023
+        last_3 = df.tail(3)["totalvanzari"]
+        predict_value = round(last_3.mean(), 2)
         last_month = df["luna"].max()
-        future_months = []
-        for k in range(1, 4):
-            nxt = (last_month + pd.offsets.MonthBegin(k))
-            if nxt.year == 2023:
-                future_months.append(nxt)
-        if future_months:
-            t_future = np.arange(len(df) + 1, len(df) + 1 + len(future_months)).reshape(-1, 1)
-            y_pred = model.predict(t_future)
+        next_month = last_month + pd.offsets.MonthBegin(1)
 
-            fut = pd.DataFrame({
-                "luna": future_months,
-                "totalvanzari_pred": y_pred
-            })
+        if next_month.year == 2023:
+            fut = pd.DataFrame({"luna": [next_month], "totalvanzari_pred": [predict_value]})
 
-            # grafic comparativ
             fig, ax = plt.subplots(figsize=(10, 5))
             sns.lineplot(data=df, x="luna", y="totalvanzari", marker="o", label="Istoric", ax=ax)
-            sns.lineplot(data=fut, x="luna", y="totalvanzari_pred", marker="o", label="Predicție", ax=ax)
+            sns.scatterplot(data=fut, x="luna", y="totalvanzari_pred", color="purple", s=150, label="Previziune")
+            ax.legend()
             plt.xticks(rotation=45)
             st.pyplot(fig)
 
-            st.success("Predicția a fost calculată pe baza regresiei liniare.")
-            st.dataframe(fut)
-            export_downloads(fut.rename(columns={"totalvanzari_pred": "totalvanzari"}), "predictie_lunara")
+            st.success(f"📌 Previziunea pentru {next_month.strftime('%b %Y')}: **{predict_value} RON**")
+            st.dataframe(fut.rename(columns={"totalvanzari_pred": "Estimat"}))
         else:
-            st.info("Toate lunile disponibile sunt până în decembrie 2023; nu mai există luni viitoare în 2023 pentru predicție.")
+            st.info("Nu mai există luni rămase în 2023 pentru previziune.")
     else:
-        st.warning("Ai nevoie de cel puțin 3 luni de date în intervalul selectat pentru a calcula o predicție.")
+        st.warning("Ai nevoie de cel puțin 3 luni de date pentru predicție.")
 
-    st.markdown("###Comparare între luni (bar chart)")
-    if not df.empty:
-        df_bar = f.groupby(f["data"].dt.month, as_index=False)["total"].sum().rename(columns={"data": "luna_idx", "total": "totalvanzari"})
-        df_bar = df_bar.rename(columns={"data": "luna_idx", 0: "luna_idx"})
-        df_bar["luna_idx"] = df_bar["luna"]
-        fig3, ax3 = plt.subplots(figsize=(10, 4))
-        sns.barplot(data=df_bar, x="luna_idx", y="totalvanzari", ax=ax3)
-        ax3.set_xlabel("Luna (1–12)")
-        st.pyplot(fig3)
+    # Bar chart comparativ
+    st.markdown("### 📊 Comparare între luni")
+    df_bar = f.groupby(f["data"].dt.month, as_index=False)["total"].sum().rename(columns={"data": "luna_idx", "total": "totalvanzari"})
+    df_bar["luna_idx"] = df_bar["luna"]
+    fig3, ax3 = plt.subplots(figsize=(10, 4))
+    sns.barplot(data=df_bar, x="luna_idx", y="totalvanzari", ax=ax3)
+    ax3.set_xlabel("Luna (1–12)")
+    st.pyplot(fig3)
