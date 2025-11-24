@@ -6,6 +6,11 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from io import BytesIO
 
+# pentru harta
+import folium
+from streamlit_folium import st_folium
+from folium.plugins import HeatMap
+
 # =========================
 # CONFIG BAZĂ DE DATE
 # =========================
@@ -94,7 +99,6 @@ col3.metric("Genuri unice", int(f["gen"].nunique()))
 col4.metric("Orașe unice", int(f["oras"].nunique()))
 
 # =========================
-# =========================
 # MENIU ANALIZE
 # =========================
 view = st.selectbox(
@@ -109,11 +113,12 @@ view = st.selectbox(
         "Vânzări medii pe client",
         "Clienți fideli (>=5 comenzi)",
         "Profitabilitate gen x oraș",
-        "Predicție (istoric)"
+        "Predicție (istoric)",
+        "Hartă vânzări pe orașe",
+        "Distribuție genuri"
     ],
     index=0
 )
-
 
 # =========================
 # HELPER EXPORT
@@ -121,7 +126,8 @@ view = st.selectbox(
 def export_downloads(df, filename_prefix="export"):
     c1, c2 = st.columns(2)
     csv_bytes = df.to_csv(index=False).encode("utf-8")
-    c1.download_button("📄 Descarcă CSV", data=csv_bytes, file_name=f"{filename_prefix}.csv", mime="text/csv")
+    c1.download_button("📄 Descarcă CSV", data=csv_bytes,
+                       file_name=f"{filename_prefix}.csv", mime="text/csv")
     try:
         bio = BytesIO()
         with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:
@@ -164,7 +170,8 @@ if view == "Asocieri vânzări-genuri":
     export_downloads(df, "asocieri")
     if not df.empty:
         fig, ax = plt.subplots(figsize=(10, 5))
-        sns.barplot(data=df, x="genmuzical", y="totalvanzari", hue="grupvarsta", ax=ax)
+        sns.barplot(data=df, x="genmuzical", y="totalvanzari",
+                    hue="grupvarsta", ax=ax)
         plt.xticks(rotation=45)
         st.pyplot(fig)
 
@@ -172,27 +179,31 @@ if view == "Asocieri vânzări-genuri":
 # 2) EVOLUȚIA VÂNZĂRILOR PE LUNI (cu Min/Max colorat)
 # =========================
 elif view == "Evoluția vânzărilor pe luni":
-    df = f.groupby(["luna", "gen"], as_index=False)["total"].sum().rename(columns={"total": "totalvanzari", "gen": "genmuzical"})
+    df = f.groupby(["luna", "gen"], as_index=False)["total"].sum() \
+          .rename(columns={"total": "totalvanzari", "gen": "genmuzical"})
     st.dataframe(df.sort_values("luna"))
     export_downloads(df, "evolutie_lunara")
 
     if not df.empty:
         fig, ax = plt.subplots(figsize=(10, 5))
-        sns.lineplot(data=df, x="luna", y="totalvanzari", hue="genmuzical", marker="o", ax=ax)
+        sns.lineplot(data=df, x="luna", y="totalvanzari",
+                     hue="genmuzical", marker="o", ax=ax)
         plt.xticks(rotation=45)
 
         # Highlight Min & Max per gen
         for g in df["genmuzical"].unique():
             sub = df[df["genmuzical"] == g]
-            if sub.empty: continue
+            if sub.empty:
+                continue
             min_row = sub.loc[sub["totalvanzari"].idxmin()]
             max_row = sub.loc[sub["totalvanzari"].idxmax()]
-            ax.scatter(min_row["luna"], min_row["totalvanzari"], color="red", s=120)
-            ax.scatter(max_row["luna"], max_row["totalvanzari"], color="green", s=120)
+            ax.scatter(min_row["luna"], min_row["totalvanzari"],
+                       color="red", s=120)
+            ax.scatter(max_row["luna"], max_row["totalvanzari"],
+                       color="green", s=120)
 
         st.pyplot(fig)
 
-        # Tabel Min/Max
         rez = []
         for g in df["genmuzical"].unique():
             sub = df[df["genmuzical"] == g]
@@ -240,7 +251,6 @@ elif view == "Evenimente (fereastră ±3 zile)":
     GROUP BY e.Nume, e.DataEveniment
     ORDER BY e.DataEveniment;
     """
-
     df = run_query(q, {"start": start_date, "end": end_date})
     df.columns = [c.lower() for c in df.columns]
 
@@ -263,7 +273,6 @@ elif view == "Evenimente (fereastră ±3 zile)":
 
         st.pyplot(fig)
         st.success(f"📈 Maxim: **{max_val:.2f} RON**  | 🔻 Minim: **{min_val:.2f} RON**")
-
 
 # =========================
 # 5) IMPACT PROMOȚII (ESTIMARE)
@@ -291,7 +300,8 @@ elif view == "Impact promoții (estimare)":
     export_downloads(df, "impact_promotii")
     if not df.empty:
         fig, ax = plt.subplots(figsize=(10, 4))
-        sns.scatterplot(data=df, x="reducereprocent", y="totalvanzariestimate", hue="genmuzical", s=120, ax=ax)
+        sns.scatterplot(data=df, x="reducereprocent", y="totalvanzariestimate",
+                        hue="genmuzical", s=120, ax=ax)
         st.pyplot(fig)
 
 # =========================
@@ -395,8 +405,10 @@ elif view == "Predicție (istoric)":
             fut = pd.DataFrame({"luna": [next_month], "totalvanzari_pred": [predict_value]})
 
             fig, ax = plt.subplots(figsize=(10, 5))
-            sns.lineplot(data=df, x="luna", y="totalvanzari", marker="o", label="Istoric", ax=ax)
-            sns.scatterplot(data=fut, x="luna", y="totalvanzari_pred", color="purple", s=150, label="Previziune")
+            sns.lineplot(data=df, x="luna", y="totalvanzari", marker="o",
+                         label="Istoric", ax=ax)
+            sns.scatterplot(data=fut, x="luna", y="totalvanzari_pred",
+                            color="purple", s=150, label="Previziune")
             plt.xticks(rotation=45)
             ax.legend()
             st.pyplot(fig)
@@ -408,3 +420,77 @@ elif view == "Predicție (istoric)":
     else:
         st.warning("Ai nevoie de cel puțin 3 luni de date pentru predicție.")
 
+# =========================
+# 11) Hartă interactivă orașe (Heatmap + Bubbles)
+# =========================
+elif view == "Hartă vânzări pe orașe":
+    st.subheader("Hartă interactivă a vânzărilor pe orașe")
+
+    df = f.groupby("oras", as_index=False)["total"].sum().rename(columns={"total": "totalvanzari"})
+
+    if df.empty:
+        st.warning("Nu există date pentru perioada selectată.")
+    else:
+        # Orașele tale din baza de date (din scriptul de generare)
+        coordonate = {
+            "Bucuresti": (44.4268, 26.1025),
+            "Cluj": (46.7712, 23.6236),
+            "Timisoara": (45.7489, 21.2087),
+            "Iasi": (47.1585, 27.6014)
+        }
+
+        df["lat"] = df["oras"].map(lambda x: coordonate.get(x, (45, 25))[0])
+        df["lon"] = df["oras"].map(lambda x: coordonate.get(x, (45, 25))[1])
+
+        m = folium.Map(location=[45.5, 25], zoom_start=6, tiles="CartoDB positron")
+
+        # Heatmap pe baza vânzărilor
+        heat_data = df[["lat", "lon", "totalvanzari"]].values.tolist()
+        HeatMap(heat_data, radius=25, blur=15, max_zoom=6).add_to(m)
+
+        # Bubbles dimensionate după vânzări
+        for _, row in df.iterrows():
+            folium.CircleMarker(
+                location=(row["lat"], row["lon"]),
+                radius=5 + row["totalvanzari"] / df["totalvanzari"].max() * 15,
+                popup=f"{row['oras']} — {row['totalvanzari']:.2f} RON",
+                color="purple",
+                fill=True,
+                fill_color="purple",
+                fill_opacity=0.7
+            ).add_to(m)
+
+        st_folium(m, width=900, height=550)
+        st.dataframe(df)
+        export_downloads(df, "harta_orase")
+            # 🖴 Export HTML pentru hartă
+            
+    if st.button("💾 Export hartă HTML"):
+        m.save("harta_interactiva_vanzari.html")
+        st.success("📌 Harta a fost salvată ca harta_interactiva_vanzari.html în folderul proiectului.")
+
+
+# =========================
+# 12) Donut Chart genuri muzicale
+# =========================
+elif view == "Distribuție genuri":
+    st.subheader("Distribuția vânzărilor pe genuri muzicale")
+
+    df = f.groupby("gen", as_index=False)["total"].sum().rename(columns={"total": "totalvanzari"})
+
+    if df.empty:
+        st.warning("Nu există date în intervalul selectat.")
+    else:
+        fig, ax = plt.subplots(figsize=(6, 6))
+        wedges, texts, autotexts = ax.pie(
+            df["totalvanzari"],
+            labels=df["gen"],
+            autopct="%1.1f%%",
+            startangle=90,
+            wedgeprops={'width': 0.3}
+        )
+        ax.set_title("Distribuție vânzări pe genuri - DONUT CHART")
+        st.pyplot(fig)
+
+        st.dataframe(df)
+        export_downloads(df, "distributie_genuri")

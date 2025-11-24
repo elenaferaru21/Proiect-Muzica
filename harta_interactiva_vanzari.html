@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_531a5de64bf1c78b42ff737b9647ebc0 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+    <script src="https://cdn.jsdelivr.net/gh/python-visualization/folium@main/folium/templates/leaflet_heat.min.js"></script>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_div {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+            <div class="folium-map" id="map_531a5de64bf1c78b42ff737b9647ebc0" ></div>
+        
+    
+            <div class="folium-map" id="map_div" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_531a5de64bf1c78b42ff737b9647ebc0 = L.map(
+                "map_531a5de64bf1c78b42ff737b9647ebc0",
+                {
+                    center: [45.5, 25.0],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 6,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_b99798b540fc791028fa717c1a9cb2b3 = L.tileLayer(
+                "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 20,
+  "maxNativeZoom": 20,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors \u0026copy; \u003ca href=\"https://carto.com/attributions\"\u003eCARTO\u003c/a\u003e",
+  "subdomains": "abcd",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_b99798b540fc791028fa717c1a9cb2b3.addTo(map_531a5de64bf1c78b42ff737b9647ebc0);
+        
+    
+            var heat_map_a9c64810c04a31ac3907af3f7c028faf = L.heatLayer(
+                [[44.4268, 26.1025, 2222122.56], [46.7712, 23.6236, 1628454.85], [47.1585, 27.6014, 101621.04], [45.7489, 21.2087, 541047.29]],
+                {
+  "minOpacity": 0.5,
+  "maxZoom": 6,
+  "radius": 25,
+  "blur": 15,
+}
+            );
+        
+    
+            heat_map_a9c64810c04a31ac3907af3f7c028faf.addTo(map_531a5de64bf1c78b42ff737b9647ebc0);
+        
+    
+            var circle_marker_76fe1ed9724def2028165a0e42c42275 = L.circleMarker(
+                [44.4268, 26.1025],
+                {"bubblingMouseEvents": true, "color": "purple", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "purple", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20.0, "stroke": true, "weight": 3}
+            ).addTo(map_531a5de64bf1c78b42ff737b9647ebc0);
+        
+    
+        var popup_dc69333f309209c3df0fc949395aa355 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_78182cd80f13a99ef6bdabf81775f27a = $(`<div id="html_78182cd80f13a99ef6bdabf81775f27a" style="width: 100.0%; height: 100.0%;">Bucuresti — 2222122.56 RON</div>`)[0];
+                popup_dc69333f309209c3df0fc949395aa355.setContent(html_78182cd80f13a99ef6bdabf81775f27a);
+            
+        
+
+        circle_marker_76fe1ed9724def2028165a0e42c42275.bindPopup(popup_dc69333f309209c3df0fc949395aa355)
+        ;
+
+        
+    
+    
+            var circle_marker_0ea2af72f67adf439dc47f1d25b43342 = L.circleMarker(
+                [46.7712, 23.6236],
+                {"bubblingMouseEvents": true, "color": "purple", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "purple", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 15.99256323197583, "stroke": true, "weight": 3}
+            ).addTo(map_531a5de64bf1c78b42ff737b9647ebc0);
+        
+    
+        var popup_9408311c7a3b5480027c96b7447eb499 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_8cc5a48cd4c9e5987607ce10c48f98b1 = $(`<div id="html_8cc5a48cd4c9e5987607ce10c48f98b1" style="width: 100.0%; height: 100.0%;">Cluj — 1628454.85 RON</div>`)[0];
+                popup_9408311c7a3b5480027c96b7447eb499.setContent(html_8cc5a48cd4c9e5987607ce10c48f98b1);
+            
+        
+
+        circle_marker_0ea2af72f67adf439dc47f1d25b43342.bindPopup(popup_9408311c7a3b5480027c96b7447eb499)
+        ;
+
+        
+    
+    
+            var circle_marker_c6a274b2e8a7e4f417cb624908b29127 = L.circleMarker(
+                [47.1585, 27.6014],
+                {"bubblingMouseEvents": true, "color": "purple", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "purple", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.68597278450744, "stroke": true, "weight": 3}
+            ).addTo(map_531a5de64bf1c78b42ff737b9647ebc0);
+        
+    
+        var popup_434502969d265e228ff21653ea3e2ac0 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_11df89df166f614fbe64ea02a8a702f0 = $(`<div id="html_11df89df166f614fbe64ea02a8a702f0" style="width: 100.0%; height: 100.0%;">Iasi — 101621.04 RON</div>`)[0];
+                popup_434502969d265e228ff21653ea3e2ac0.setContent(html_11df89df166f614fbe64ea02a8a702f0);
+            
+        
+
+        circle_marker_c6a274b2e8a7e4f417cb624908b29127.bindPopup(popup_434502969d265e228ff21653ea3e2ac0)
+        ;
+
+        
+    
+    
+            var circle_marker_65265c1c3cf1422d7b9ebe3670f7bb79 = L.circleMarker(
+                [45.7489, 21.2087],
+                {"bubblingMouseEvents": true, "color": "purple", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "purple", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8.652233002845712, "stroke": true, "weight": 3}
+            ).addTo(map_531a5de64bf1c78b42ff737b9647ebc0);
+        
+    
+        var popup_99dcc2f74489ed88e6fb29c0b18ee845 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_da0920b38518896123873593d4b9c3d2 = $(`<div id="html_da0920b38518896123873593d4b9c3d2" style="width: 100.0%; height: 100.0%;">Timisoara — 541047.29 RON</div>`)[0];
+                popup_99dcc2f74489ed88e6fb29c0b18ee845.setContent(html_da0920b38518896123873593d4b9c3d2);
+            
+        
+
+        circle_marker_65265c1c3cf1422d7b9ebe3670f7bb79.bindPopup(popup_99dcc2f74489ed88e6fb29c0b18ee845)
+        ;
+
+        
+    
+    
+            tile_layer_b99798b540fc791028fa717c1a9cb2b3.addTo(map_531a5de64bf1c78b42ff737b9647ebc0);
+        
+    
+            heat_map_a9c64810c04a31ac3907af3f7c028faf.addTo(map_531a5de64bf1c78b42ff737b9647ebc0);
+        
+    
+            var map_div = L.map(
+                "map_div",
+                {
+                    center: [45.5, 25.0],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 6,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_div_0 = L.tileLayer(
+                "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 20,
+  "maxNativeZoom": 20,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors \u0026copy; \u003ca href=\"https://carto.com/attributions\"\u003eCARTO\u003c/a\u003e",
+  "subdomains": "abcd",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_b99798b540fc791028fa717c1a9cb2b3.addTo(map_531a5de64bf1c78b42ff737b9647ebc0);
+        
+    
+            tile_layer_div_0.addTo(map_div);
+        
+    
+            var heat_map_div_1 = L.heatLayer(
+                [[44.4268, 26.1025, 2222122.56], [46.7712, 23.6236, 1628454.85], [47.1585, 27.6014, 101621.04], [45.7489, 21.2087, 541047.29]],
+                {
+  "minOpacity": 0.5,
+  "maxZoom": 6,
+  "radius": 25,
+  "blur": 15,
+}
+            );
+        
+    
+            heat_map_a9c64810c04a31ac3907af3f7c028faf.addTo(map_531a5de64bf1c78b42ff737b9647ebc0);
+        
+    
+            heat_map_div_1.addTo(map_div);
+        
+    
+            var circle_marker_div_2 = L.circleMarker(
+                [44.4268, 26.1025],
+                {"bubblingMouseEvents": true, "color": "purple", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "purple", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 20.0, "stroke": true, "weight": 3}
+            ).addTo(map_div);
+        
+    
+        var popup_div_2_0 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_78182cd80f13a99ef6bdabf81775f27a = $(`<div id="html_78182cd80f13a99ef6bdabf81775f27a" style="width: 100.0%; height: 100.0%;">Bucuresti — 2222122.56 RON</div>`)[0];
+                popup_div_2_0.setContent(html_78182cd80f13a99ef6bdabf81775f27a);
+            
+        
+
+        circle_marker_div_2.bindPopup(popup_div_2_0)
+        ;
+
+        
+    
+    
+            var circle_marker_div_3 = L.circleMarker(
+                [46.7712, 23.6236],
+                {"bubblingMouseEvents": true, "color": "purple", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "purple", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 15.99256323197583, "stroke": true, "weight": 3}
+            ).addTo(map_div);
+        
+    
+        var popup_div_3_0 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_8cc5a48cd4c9e5987607ce10c48f98b1 = $(`<div id="html_8cc5a48cd4c9e5987607ce10c48f98b1" style="width: 100.0%; height: 100.0%;">Cluj — 1628454.85 RON</div>`)[0];
+                popup_div_3_0.setContent(html_8cc5a48cd4c9e5987607ce10c48f98b1);
+            
+        
+
+        circle_marker_div_3.bindPopup(popup_div_3_0)
+        ;
+
+        
+    
+    
+            var circle_marker_div_4 = L.circleMarker(
+                [47.1585, 27.6014],
+                {"bubblingMouseEvents": true, "color": "purple", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "purple", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5.68597278450744, "stroke": true, "weight": 3}
+            ).addTo(map_div);
+        
+    
+        var popup_div_4_0 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_11df89df166f614fbe64ea02a8a702f0 = $(`<div id="html_11df89df166f614fbe64ea02a8a702f0" style="width: 100.0%; height: 100.0%;">Iasi — 101621.04 RON</div>`)[0];
+                popup_div_4_0.setContent(html_11df89df166f614fbe64ea02a8a702f0);
+            
+        
+
+        circle_marker_div_4.bindPopup(popup_div_4_0)
+        ;
+
+        
+    
+    
+            var circle_marker_div_5 = L.circleMarker(
+                [45.7489, 21.2087],
+                {"bubblingMouseEvents": true, "color": "purple", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "purple", "fillOpacity": 0.7, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8.652233002845712, "stroke": true, "weight": 3}
+            ).addTo(map_div);
+        
+    
+        var popup_div_5_0 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_da0920b38518896123873593d4b9c3d2 = $(`<div id="html_da0920b38518896123873593d4b9c3d2" style="width: 100.0%; height: 100.0%;">Timisoara — 541047.29 RON</div>`)[0];
+                popup_div_5_0.setContent(html_da0920b38518896123873593d4b9c3d2);
+            
+        
+
+        circle_marker_div_5.bindPopup(popup_div_5_0)
+        ;
+
+        
+    
+</script>
+</html>
