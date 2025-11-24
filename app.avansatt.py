@@ -94,6 +94,7 @@ col3.metric("Genuri unice", int(f["gen"].nunique()))
 col4.metric("Orașe unice", int(f["oras"].nunique()))
 
 # =========================
+# =========================
 # MENIU ANALIZE
 # =========================
 view = st.selectbox(
@@ -108,10 +109,11 @@ view = st.selectbox(
         "Vânzări medii pe client",
         "Clienți fideli (>=5 comenzi)",
         "Profitabilitate gen x oraș",
-        "Predicție & Comparare"
+        "Predicție (istoric)"
     ],
     index=0
 )
+
 
 # =========================
 # HELPER EXPORT
@@ -221,7 +223,7 @@ elif view == "Necesar aprovizionare (suport)":
 # =========================
 # 4) EVENIMENTE (±3 zile)
 # =========================
-elif view == "Evenimente (±3 zile)":
+elif view == "Evenimente (fereastră ±3 zile)":
     q = """
     SELECT 
         e.Nume AS eveniment,
@@ -234,47 +236,34 @@ elif view == "Evenimente (±3 zile)":
                             AND e.DataEveniment + INTERVAL '3 days'
     LEFT JOIN DetaliuComanda d 
         ON co.ComandaID = d.ComandaID
-    LEFT JOIN Produs p ON d.ProdusID = p.ProdusID
-    LEFT JOIN CategorieProdus cat ON p.CategorieProdusID = cat.CategorieProdusID
-    LEFT JOIN Client c ON co.ClientID = c.ClientID
-    WHERE 
-        -- filtrăm doar vânzările, nu evenimentele
-        (co.DataComanda BETWEEN %(start)s AND %(end)s)
-        OR co.ComandaID IS NULL
+    WHERE co.DataComanda BETWEEN %(start)s AND %(end)s
     GROUP BY e.Nume, e.DataEveniment
     ORDER BY e.DataEveniment;
     """
 
     df = run_query(q, {"start": start_date, "end": end_date})
+    df.columns = [c.lower() for c in df.columns]
 
-    df.columns = [c.lower() for c in df.columns]  # lowercase
-
-    # Afișare tabel
     st.dataframe(df)
-
     export_downloads(df, "evenimente")
 
-    # Grafic + evidențiere min/max
     if df.empty:
         st.warning("⚠️ Nu există vânzări asociate evenimentelor în perioada selectată.")
     else:
         fig, ax = plt.subplots(figsize=(12, 4))
-        sns.barplot(data=df, x="eveniment", y="total_vanzari", ax=ax)
+        bars = ax.bar(df["eveniment"], df["total_vanzari"])
         plt.xticks(rotation=45)
 
-        # Evidențiere min / max
-        max_val = df["total_vanzari"].max()
-        min_val = df["total_vanzari"].min()
-
-        for i, v in enumerate(df["total_vanzari"]):
-            if v == max_val:
-                ax.bar(i, v, color="green")
-            elif v == min_val:
-                ax.bar(i, v, color="red")
+        max_val, min_val = df["total_vanzari"].max(), df["total_vanzari"].min()
+        for bar, val in zip(bars, df["total_vanzari"]):
+            if val == max_val:
+                bar.set_color("green")
+            elif val == min_val:
+                bar.set_color("red")
 
         st.pyplot(fig)
-
         st.success(f"📈 Maxim: **{max_val:.2f} RON**  | 🔻 Minim: **{min_val:.2f} RON**")
+
 
 # =========================
 # 5) IMPACT PROMOȚII (ESTIMARE)
@@ -389,8 +378,8 @@ elif view == "Profitabilitate gen x oraș":
 # =========================
 # 10) PREVIZIUNE ISTORICĂ
 # =========================
-elif view == "Predicție":
-    st.subheader("Predicție bazată pe istoric (media ultimelor 3 luni)")
+elif view == "Predicție (istoric)":
+    st.subheader("Predicție bazată pe istoricul ultimelor 3 luni")
 
     df = f.groupby("luna", as_index=False)["total"].sum().rename(columns={"total": "totalvanzari"})
     df = df.sort_values("luna")
@@ -398,6 +387,7 @@ elif view == "Predicție":
     if df.shape[0] >= 3:
         last_3 = df.tail(3)["totalvanzari"]
         predict_value = round(last_3.mean(), 2)
+
         last_month = df["luna"].max()
         next_month = last_month + pd.offsets.MonthBegin(1)
 
@@ -407,8 +397,8 @@ elif view == "Predicție":
             fig, ax = plt.subplots(figsize=(10, 5))
             sns.lineplot(data=df, x="luna", y="totalvanzari", marker="o", label="Istoric", ax=ax)
             sns.scatterplot(data=fut, x="luna", y="totalvanzari_pred", color="purple", s=150, label="Previziune")
-            ax.legend()
             plt.xticks(rotation=45)
+            ax.legend()
             st.pyplot(fig)
 
             st.success(f"📌 Previziunea pentru {next_month.strftime('%b %Y')}: **{predict_value} RON**")
