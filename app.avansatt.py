@@ -219,30 +219,62 @@ elif view == "Necesar aprovizionare (suport)":
         st.pyplot(fig)
 
 # =========================
-# 4) EVENIMENTE (±3 ZILE)
+# 4) EVENIMENTE (±3 zile)
 # =========================
 elif view == "Evenimente (±3 zile)":
     q = """
     SELECT 
-        e.Nume AS Eveniment,
-        e.DataEveniment AS DataEveniment,
-        SUM(d.TotalLinie) AS TotalVanzari
+        e.Nume AS eveniment,
+        e.DataEveniment AS dataeveniment,
+        SUM(d.TotalLinie) AS total_vanzari,
+        COUNT(co.ComandaID) AS nr_comenzi
     FROM Eveniment e
-    JOIN Comanda co ON co.DataComanda BETWEEN e.DataEveniment - INTERVAL '3 days'
-                                      AND e.DataEveniment + INTERVAL '3 days'
-    JOIN DetaliuComanda d ON co.ComandaID = d.ComandaID
-    WHERE e.DataEveniment BETWEEN %(start)s AND %(end)s
+    LEFT JOIN Comanda co 
+        ON co.DataComanda BETWEEN e.DataEveniment - INTERVAL '3 days'
+                            AND e.DataEveniment + INTERVAL '3 days'
+    LEFT JOIN DetaliuComanda d 
+        ON co.ComandaID = d.ComandaID
+    LEFT JOIN Produs p ON d.ProdusID = p.ProdusID
+    LEFT JOIN CategorieProdus cat ON p.CategorieProdusID = cat.CategorieProdusID
+    LEFT JOIN Client c ON co.ClientID = c.ClientID
+    WHERE 
+        -- filtrăm doar vânzările, nu evenimentele
+        (co.DataComanda BETWEEN %(start)s AND %(end)s)
+        OR co.ComandaID IS NULL
     GROUP BY e.Nume, e.DataEveniment
     ORDER BY e.DataEveniment;
     """
+
     df = run_query(q, {"start": start_date, "end": end_date})
+
+    df.columns = [c.lower() for c in df.columns]  # lowercase
+
+    # Afișare tabel
     st.dataframe(df)
+
     export_downloads(df, "evenimente")
-    if not df.empty:
-        fig, ax = plt.subplots(figsize=(10, 4))
-        sns.barplot(data=df, x="eveniment", y="totalvanzari", ax=ax)
+
+    # Grafic + evidențiere min/max
+    if df.empty:
+        st.warning("⚠️ Nu există vânzări asociate evenimentelor în perioada selectată.")
+    else:
+        fig, ax = plt.subplots(figsize=(12, 4))
+        sns.barplot(data=df, x="eveniment", y="total_vanzari", ax=ax)
         plt.xticks(rotation=45)
+
+        # Evidențiere min / max
+        max_val = df["total_vanzari"].max()
+        min_val = df["total_vanzari"].min()
+
+        for i, v in enumerate(df["total_vanzari"]):
+            if v == max_val:
+                ax.bar(i, v, color="green")
+            elif v == min_val:
+                ax.bar(i, v, color="red")
+
         st.pyplot(fig)
+
+        st.success(f"📈 Maxim: **{max_val:.2f} RON**  | 🔻 Minim: **{min_val:.2f} RON**")
 
 # =========================
 # 5) IMPACT PROMOȚII (ESTIMARE)
@@ -357,8 +389,8 @@ elif view == "Profitabilitate gen x oraș":
 # =========================
 # 10) PREVIZIUNE ISTORICĂ
 # =========================
-elif view == "Predicție & Comparare":
-    st.subheader("🔮 Predicție bazată pe istoric (media ultimelor 3 luni)")
+elif view == "Predicție":
+    st.subheader("Predicție bazată pe istoric (media ultimelor 3 luni)")
 
     df = f.groupby("luna", as_index=False)["total"].sum().rename(columns={"total": "totalvanzari"})
     df = df.sort_values("luna")
@@ -386,11 +418,3 @@ elif view == "Predicție & Comparare":
     else:
         st.warning("Ai nevoie de cel puțin 3 luni de date pentru predicție.")
 
-    # Bar chart comparativ
-    st.markdown("### 📊 Comparare între luni")
-    df_bar = f.groupby(f["data"].dt.month, as_index=False)["total"].sum().rename(columns={"data": "luna_idx", "total": "totalvanzari"})
-    df_bar["luna_idx"] = df_bar["luna"]
-    fig3, ax3 = plt.subplots(figsize=(10, 4))
-    sns.barplot(data=df_bar, x="luna_idx", y="totalvanzari", ax=ax3)
-    ax3.set_xlabel("Luna (1–12)")
-    st.pyplot(fig3)
