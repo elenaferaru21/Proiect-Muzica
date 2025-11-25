@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from io import BytesIO
+from math import radians, sin, cos, sqrt, atan2
 
 # pentru harta
 import folium
@@ -28,6 +29,20 @@ def run_query(query, params=None):
     conn.close()
     df.columns = [c.lower() for c in df.columns]
     return df
+
+# =========================
+# FUNCȚII UTILE
+# =========================
+def distance_km(coord1, coord2):
+    """Calculează distanța aproximativă (great-circle) între 2 coordonate (lat, lon)."""
+    R = 6371.0  # raza Pământului în km
+    lat1, lon1 = coord1
+    lat2, lon2 = coord2
+    dlat = radians(lat2 - lat1)
+    dlon = radians(lon2 - lon1)
+    a = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    return R * c
 
 # =========================
 # SETĂRI PAGINĂ
@@ -115,25 +130,26 @@ view = st.selectbox(
         "Profitabilitate gen x oraș",
         "Predicție (istoric)",
         "Hartă vânzări pe orașe",
-        "Distribuție genuri"
+        "Distribuție genuri",
+        "Export HTML raport"
     ],
     index=0
 )
 
 # =========================
-# HELPER EXPORT
+# HELPER EXPORT CSV+EXCEL SIMPLU
 # =========================
 def export_downloads(df, filename_prefix="export"):
     c1, c2 = st.columns(2)
     csv_bytes = df.to_csv(index=False).encode("utf-8")
-    c1.download_button("📄 Descarcă CSV", data=csv_bytes,
+    c1.download_button("Descarcă CSV", data=csv_bytes,
                        file_name=f"{filename_prefix}.csv", mime="text/csv")
     try:
         bio = BytesIO()
         with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:
             df.to_excel(writer, sheet_name="Date", index=False)
         c2.download_button(
-            "💾 Descarcă Excel",
+            "Descarcă Excel",
             data=bio.getvalue(),
             file_name=f"{filename_prefix}.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -214,7 +230,7 @@ elif view == "Evoluția vânzărilor pe luni":
                 "Luna MAX": sub.loc[sub["totalvanzari"].idxmax()]["luna"],
                 "Valoare MAX": sub["totalvanzari"].max()
             })
-        st.markdown("### 📌 Puncte Minime și Maxime Identificate")
+        st.markdown("### Puncte Minime și Maxime Identificate")
         st.dataframe(pd.DataFrame(rez))
 
 # =========================
@@ -258,7 +274,7 @@ elif view == "Evenimente (fereastră ±3 zile)":
     export_downloads(df, "evenimente")
 
     if df.empty:
-        st.warning("⚠️ Nu există vânzări asociate evenimentelor în perioada selectată.")
+        st.warning("Nu există vânzări asociate evenimentelor în perioada selectată.")
     else:
         fig, ax = plt.subplots(figsize=(12, 4))
         bars = ax.bar(df["eveniment"], df["total_vanzari"])
@@ -386,7 +402,7 @@ elif view == "Profitabilitate gen x oraș":
         st.pyplot(fig)
 
 # =========================
-# 10) PREVIZIUNE ISTORICĂ
+# 10) PREVIZIUNE ISTORICĂ + EXPORT EXCEL TRENDLINE
 # =========================
 elif view == "Predicție (istoric)":
     st.subheader("Predicție bazată pe istoricul ultimelor 3 luni")
@@ -413,15 +429,82 @@ elif view == "Predicție (istoric)":
             ax.legend()
             st.pyplot(fig)
 
-            st.success(f"📌 Previziunea pentru {next_month.strftime('%b %Y')}: **{predict_value} RON**")
+            st.success(f"Previziunea pentru {next_month.strftime('%b %Y')}: **{predict_value} RON**")
             st.dataframe(fut.rename(columns={"totalvanzari_pred": "Estimat"}))
         else:
             st.info("Nu mai există luni rămase în 2023 pentru previziune.")
     else:
         st.warning("Ai nevoie de cel puțin 3 luni de date pentru predicție.")
 
+    # --- Export Excel avansat cu trendline, R² și conditional formatting ---
+    if not df.empty:
+        st.markdown("### Export Excel cu grafic, trendline și formatări")
+        if st.button("Creează fișier Excel de predicție"):
+            try:
+                bio = BytesIO()
+                with pd.ExcelWriter(bio, engine="xlsxwriter") as writer:
+                    df_excel = df.copy()
+                    # transformăm luna în text pentru afișare
+                    df_excel["luna_text"] = df_excel["luna"].dt.strftime("%Y-%m")
+                    df_excel = df_excel[["luna_text", "totalvanzari"]]
+                    df_excel.columns = ["Luna", "TotalVanzari"]
+
+                    # scriem datele începând cu rândul 2 (rândul 1 = header titlu)
+                    df_excel.to_excel(writer, sheet_name="Istoric", index=False, startrow=1)
+                    workbook = writer.book
+                    worksheet = writer.sheets["Istoric"]
+
+                    # titlu raport
+                    worksheet.write(0, 0, "Evoluție vânzări lunare (raport BI)")
+
+                    last_row = len(df_excel) + 1  # +1 pentru header
+
+                    # total pe coloană (formulă)
+                    worksheet.write(last_row + 1, 0, "Total")
+                    worksheet.write_formula(last_row + 1, 1, f"=SUM(B3:B{last_row+1})")
+
+                    # formatări de bază
+                    bold = workbook.add_format({"bold": True})
+                    money = workbook.add_format({"num_format": "#,##0.00"})
+                    worksheet.set_column("A:A", 12)
+                    worksheet.set_column("B:B", 15, money)
+                    worksheet.set_row(0, 18, bold)
+
+                    # conditional formatting (3 color scale)
+                    worksheet.conditional_format(2, 1, last_row + 1, 1, {
+                        "type": "3_color_scale"
+                    })
+
+                    # grafic cu trendline și R²
+                    chart = workbook.add_chart({"type": "line"})
+                    chart.add_series({
+                        "name": "Total vânzări",
+                        "categories": ["Istoric", 2, 0, last_row + 1, 0],  # A3:A...
+                        "values": ["Istoric", 2, 1, last_row + 1, 1],      # B3:B...
+                        "trendline": {
+                            "type": "linear",
+                            "display_r_squared": True,
+                            "display_equation": False
+                        },
+                    })
+                    chart.set_title({"name": "Evoluție vânzări & trendline"})
+                    chart.set_x_axis({"name": "Luna"})
+                    chart.set_y_axis({"name": "Vânzări (RON)"})
+                    chart.set_legend({"position": "bottom"})
+
+                    worksheet.insert_chart("D3", chart)
+
+                st.download_button(
+                    "⬇Descarcă Excel cu trendline",
+                    data=bio.getvalue(),
+                    file_name="predictie_trendline.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
+            except Exception as e:
+                st.error(f"A apărut o eroare la generarea fișierului Excel: {e}")
+
 # =========================
-# 11) Hartă interactivă orașe (Heatmap + Bubbles)
+# 11) Hartă interactivă orașe (Heatmap + Bubbles + distanțe)
 # =========================
 elif view == "Hartă vânzări pe orașe":
     st.subheader("Hartă interactivă a vânzărilor pe orașe")
@@ -463,12 +546,28 @@ elif view == "Hartă vânzări pe orașe":
         st_folium(m, width=900, height=550)
         st.dataframe(df)
         export_downloads(df, "harta_orase")
-            # 🖴 Export HTML pentru hartă
-            
-    if st.button("💾 Export hartă HTML"):
-        m.save("harta_interactiva_vanzari.html")
-        st.success("📌 Harta a fost salvată ca harta_interactiva_vanzari.html în folderul proiectului.")
 
+        # Export hartă HTML (fișier fizic)
+        if st.button("Export hartă HTML"):
+            m.save("harta_interactiva_vanzari.html")
+            st.success("Harta a fost salvată ca harta_interactiva_vanzari.html în folderul proiectului.")
+
+        # Calcul distanță între orașe (similar cu exercițiul MapPoint - route & distance)
+        st.markdown("### 📐 Distanță aproximativă între două orașe")
+        orase_disponibile = [o for o in df["oras"].unique() if o in coordonate.keys()]
+        if len(orase_disponibile) >= 2:
+            c1, c2 = st.columns(2)
+            oras1 = c1.selectbox("Oraș plecare", orase_disponibile, key="oras_start")
+            oras2 = c2.selectbox("Oraș destinație", orase_disponibile, key="oras_stop")
+
+            if st.button("Calculează distanța (km)"):
+                coord1 = coordonate.get(oras1)
+                coord2 = coordonate.get(oras2)
+                if coord1 and coord2:
+                    dist = distance_km(coord1, coord2)
+                    st.success(f"Distanța aproximativă între **{oras1}** și **{oras2}** este de **{dist:.1f} km**.")
+        else:
+            st.info("Sunt necesare cel puțin 2 orașe cu coordonate definite pentru a calcula distanța.")
 
 # =========================
 # 12) Donut Chart genuri muzicale
@@ -494,3 +593,78 @@ elif view == "Distribuție genuri":
 
         st.dataframe(df)
         export_downloads(df, "distributie_genuri")
+
+# =========================
+# 13) EXPORT HTML RAPORT
+# =========================
+elif view == "Export HTML raport":
+    st.subheader("Export HTML – raport vânzări pe genuri (tip foaie web)")
+
+    df = f.groupby("gen", as_index=False)["total"].sum().rename(columns={"total": "totalvanzari"})
+    if df.empty:
+        st.warning("Nu există date în intervalul selectat.")
+    else:
+        # construim un mic raport HTML cu CSS
+        html_table = df.to_html(index=False, classes="tabel-bi", border=0)
+        html_doc = f"""
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <title>Raport vânzări pe genuri</title>
+    <style>
+        body {{
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f5f5f5;
+        }}
+        h1 {{
+            text-align: center;
+            color: #333;
+        }}
+        .tabel-bi {{
+            border-collapse: collapse;
+            width: 70%;
+            margin: 20px auto;
+            background-color: #ffffff;
+        }}
+        .tabel-bi thead tr {{
+            background-color: #4a90e2;
+            color: #ffffff;
+        }}
+        .tabel-bi th, .tabel-bi td {{
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: center;
+        }}
+        .tabel-bi tr:nth-child(even) {{
+            background-color: #f2f2f2;
+        }}
+        .tabel-bi tr:hover {{
+            background-color: #e6f2ff;
+        }}
+        .footer {{
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+        }}
+    </style>
+</head>
+<body>
+    <h1>Raport vânzări pe genuri muzicale</h1>
+    {html_table}
+    <div class="footer">
+        Generat automat din aplicația Streamlit – proiect BI muzică
+    </div>
+</body>
+</html>
+"""
+        st.markdown("Preview cod HTML (primele 400 caractere):")
+        st.code(html_doc[:400] + "...\n", language="html")
+
+        st.download_button(
+            "Descarcă raport HTML",
+            data=html_doc.encode("utf-8"),
+            file_name="raport_vanzari_genuri.html",
+            mime="text/html"
+        )
