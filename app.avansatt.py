@@ -514,7 +514,7 @@ elif view == "Hartă vânzări pe orașe":
     if df.empty:
         st.warning("Nu există date pentru perioada selectată.")
     else:
-        # Orașele tale din baza de date (din scriptul de generare)
+        # Orașele din baza de date (din scriptul de generare)
         coordonate = {
             "Bucuresti": (44.4268, 26.1025),
             "Cluj": (46.7712, 23.6236),
