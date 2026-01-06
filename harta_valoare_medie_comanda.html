@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_7e2e8eb163af43dd6bf49ba8baf66d55 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_div {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+            <div class="folium-map" id="map_7e2e8eb163af43dd6bf49ba8baf66d55" ></div>
+        
+    
+            <div class="folium-map" id="map_div" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_7e2e8eb163af43dd6bf49ba8baf66d55 = L.map(
+                "map_7e2e8eb163af43dd6bf49ba8baf66d55",
+                {
+                    center: [45.5, 25.0],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 6,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_154697740f1feba595c3c3e7951fd567 = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_154697740f1feba595c3c3e7951fd567.addTo(map_7e2e8eb163af43dd6bf49ba8baf66d55);
+        
+    
+            var circle_marker_ec235ac2876aa30d02b050b0e63d8e05 = L.circleMarker(
+                [44.4268, 26.1025],
+                {"bubblingMouseEvents": true, "color": "darkblue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 23.675267876667398, "stroke": true, "weight": 3}
+            ).addTo(map_7e2e8eb163af43dd6bf49ba8baf66d55);
+        
+    
+        var popup_33db9c734d4d8a2e33d6ea51f66e4a38 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_9103e070000306aec06208acceedbf12 = $(`<div id="html_9103e070000306aec06208acceedbf12" style="width: 100.0%; height: 100.0%;"><b>Bucuresti</b><br>Valoare medie comandă: 89.81 RON<br>Nr. comenzi: 25448</div>`)[0];
+                popup_33db9c734d4d8a2e33d6ea51f66e4a38.setContent(html_9103e070000306aec06208acceedbf12);
+            
+        
+
+        circle_marker_ec235ac2876aa30d02b050b0e63d8e05.bindPopup(popup_33db9c734d4d8a2e33d6ea51f66e4a38)
+        ;
+
+        
+    
+    
+            var circle_marker_cc92df31aa4708a95a0b25d143cc7edc = L.circleMarker(
+                [46.7712, 23.6236],
+                {"bubblingMouseEvents": true, "color": "darkblue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 23.683140170566368, "stroke": true, "weight": 3}
+            ).addTo(map_7e2e8eb163af43dd6bf49ba8baf66d55);
+        
+    
+        var popup_05a79b7dcba5c31bc5f6807bb9da42b6 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_06605cbd00a90390664fa2b77bfccc35 = $(`<div id="html_06605cbd00a90390664fa2b77bfccc35" style="width: 100.0%; height: 100.0%;"><b>Cluj</b><br>Valoare medie comandă: 89.85 RON<br>Nr. comenzi: 16802</div>`)[0];
+                popup_05a79b7dcba5c31bc5f6807bb9da42b6.setContent(html_06605cbd00a90390664fa2b77bfccc35);
+            
+        
+
+        circle_marker_cc92df31aa4708a95a0b25d143cc7edc.bindPopup(popup_05a79b7dcba5c31bc5f6807bb9da42b6)
+        ;
+
+        
+    
+    
+            var circle_marker_1c8ff21772c15cf1ed36398f74fc1e55 = L.circleMarker(
+                [47.1585, 27.6014],
+                {"bubblingMouseEvents": true, "color": "darkblue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 24.0, "stroke": true, "weight": 3}
+            ).addTo(map_7e2e8eb163af43dd6bf49ba8baf66d55);
+        
+    
+        var popup_60da7e7a5c3f5ef03fe53d4d2dc24c2c = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_4f349f97cb5cc166077dae92f0d1e9d6 = $(`<div id="html_4f349f97cb5cc166077dae92f0d1e9d6" style="width: 100.0%; height: 100.0%;"><b>Iasi</b><br>Valoare medie comandă: 91.46 RON<br>Nr. comenzi: 1211</div>`)[0];
+                popup_60da7e7a5c3f5ef03fe53d4d2dc24c2c.setContent(html_4f349f97cb5cc166077dae92f0d1e9d6);
+            
+        
+
+        circle_marker_1c8ff21772c15cf1ed36398f74fc1e55.bindPopup(popup_60da7e7a5c3f5ef03fe53d4d2dc24c2c)
+        ;
+
+        
+    
+    
+            var circle_marker_e5a3ac2a53e95604638b341987497a36 = L.circleMarker(
+                [45.7489, 21.2087],
+                {"bubblingMouseEvents": true, "color": "darkblue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 23.616225672425106, "stroke": true, "weight": 3}
+            ).addTo(map_7e2e8eb163af43dd6bf49ba8baf66d55);
+        
+    
+        var popup_51d3938ec7117107d8889f2cba6e1d59 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_1990830f805fb657a349750b7ef8609c = $(`<div id="html_1990830f805fb657a349750b7ef8609c" style="width: 100.0%; height: 100.0%;"><b>Timisoara</b><br>Valoare medie comandă: 89.51 RON<br>Nr. comenzi: 6463</div>`)[0];
+                popup_51d3938ec7117107d8889f2cba6e1d59.setContent(html_1990830f805fb657a349750b7ef8609c);
+            
+        
+
+        circle_marker_e5a3ac2a53e95604638b341987497a36.bindPopup(popup_51d3938ec7117107d8889f2cba6e1d59)
+        ;
+
+        
+    
+    
+            tile_layer_154697740f1feba595c3c3e7951fd567.addTo(map_7e2e8eb163af43dd6bf49ba8baf66d55);
+        
+    
+            var map_div = L.map(
+                "map_div",
+                {
+                    center: [45.5, 25.0],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 6,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_div_0 = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_154697740f1feba595c3c3e7951fd567.addTo(map_7e2e8eb163af43dd6bf49ba8baf66d55);
+        
+    
+            tile_layer_div_0.addTo(map_div);
+        
+    
+            var circle_marker_div_1 = L.circleMarker(
+                [44.4268, 26.1025],
+                {"bubblingMouseEvents": true, "color": "darkblue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 23.675267876667398, "stroke": true, "weight": 3}
+            ).addTo(map_div);
+        
+    
+        var popup_div_1_0 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_9103e070000306aec06208acceedbf12 = $(`<div id="html_9103e070000306aec06208acceedbf12" style="width: 100.0%; height: 100.0%;"><b>Bucuresti</b><br>Valoare medie comandă: 89.81 RON<br>Nr. comenzi: 25448</div>`)[0];
+                popup_div_1_0.setContent(html_9103e070000306aec06208acceedbf12);
+            
+        
+
+        circle_marker_div_1.bindPopup(popup_div_1_0)
+        ;
+
+        
+    
+    
+            var circle_marker_div_2 = L.circleMarker(
+                [46.7712, 23.6236],
+                {"bubblingMouseEvents": true, "color": "darkblue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 23.683140170566368, "stroke": true, "weight": 3}
+            ).addTo(map_div);
+        
+    
+        var popup_div_2_0 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_06605cbd00a90390664fa2b77bfccc35 = $(`<div id="html_06605cbd00a90390664fa2b77bfccc35" style="width: 100.0%; height: 100.0%;"><b>Cluj</b><br>Valoare medie comandă: 89.85 RON<br>Nr. comenzi: 16802</div>`)[0];
+                popup_div_2_0.setContent(html_06605cbd00a90390664fa2b77bfccc35);
+            
+        
+
+        circle_marker_div_2.bindPopup(popup_div_2_0)
+        ;
+
+        
+    
+    
+            var circle_marker_div_3 = L.circleMarker(
+                [47.1585, 27.6014],
+                {"bubblingMouseEvents": true, "color": "darkblue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 24.0, "stroke": true, "weight": 3}
+            ).addTo(map_div);
+        
+    
+        var popup_div_3_0 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_4f349f97cb5cc166077dae92f0d1e9d6 = $(`<div id="html_4f349f97cb5cc166077dae92f0d1e9d6" style="width: 100.0%; height: 100.0%;"><b>Iasi</b><br>Valoare medie comandă: 91.46 RON<br>Nr. comenzi: 1211</div>`)[0];
+                popup_div_3_0.setContent(html_4f349f97cb5cc166077dae92f0d1e9d6);
+            
+        
+
+        circle_marker_div_3.bindPopup(popup_div_3_0)
+        ;
+
+        
+    
+    
+            var circle_marker_div_4 = L.circleMarker(
+                [45.7489, 21.2087],
+                {"bubblingMouseEvents": true, "color": "darkblue", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 0.6, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 23.616225672425106, "stroke": true, "weight": 3}
+            ).addTo(map_div);
+        
+    
+        var popup_div_4_0 = L.popup({
+  "maxWidth": "100%",
+});
+
+        
+            
+                var html_1990830f805fb657a349750b7ef8609c = $(`<div id="html_1990830f805fb657a349750b7ef8609c" style="width: 100.0%; height: 100.0%;"><b>Timisoara</b><br>Valoare medie comandă: 89.51 RON<br>Nr. comenzi: 6463</div>`)[0];
+                popup_div_4_0.setContent(html_1990830f805fb657a349750b7ef8609c);
+            
+        
+
+        circle_marker_div_4.bindPopup(popup_div_4_0)
+        ;
+
+        
+    
+</script>
+</html>

@@ -130,6 +130,7 @@ view = st.selectbox(
         "Profitabilitate gen x oraș",
         "Predicție (istoric)",
         "Hartă vânzări pe orașe",
+        "Hartă valoare medie comandă (clienți)",
         "Distribuție genuri",
         "Export HTML raport"
     ],
@@ -568,6 +569,62 @@ elif view == "Hartă vânzări pe orașe":
                     st.success(f"Distanța aproximativă între **{oras1}** și **{oras2}** este de **{dist:.1f} km**.")
         else:
             st.info("Sunt necesare cel puțin 2 orașe cu coordonate definite pentru a calcula distanța.")
+# =========================
+# 11b) Hartă valoare medie comandă (clienți)
+# =========================
+elif view == "Hartă valoare medie comandă (clienți)":
+    st.subheader("Hartă interactivă – valoare medie comandă per oraș")
+
+    q = """
+    SELECT 
+        c.Oras AS oras,
+        COUNT(DISTINCT co.ComandaID) AS nr_comenzi,
+        ROUND(SUM(d.TotalLinie) / COUNT(DISTINCT co.ComandaID), 2) AS valoare_medie
+    FROM Client c
+    JOIN Comanda co ON c.ClientID = co.ClientID
+    JOIN DetaliuComanda d ON co.ComandaID = d.ComandaID
+    WHERE co.DataComanda BETWEEN %(start)s AND %(end)s
+    GROUP BY c.Oras;
+    """
+    df = run_query(q, {"start": start_date, "end": end_date})
+
+    if df.empty:
+        st.warning("Nu există date pentru perioada selectată.")
+    else:
+        coordonate = {
+            "Bucuresti": (44.4268, 26.1025),
+            "Cluj": (46.7712, 23.6236),
+            "Timisoara": (45.7489, 21.2087),
+            "Iasi": (47.1585, 27.6014)
+        }
+
+        df["lat"] = df["oras"].map(lambda x: coordonate.get(x, (45, 25))[0])
+        df["lon"] = df["oras"].map(lambda x: coordonate.get(x, (45, 25))[1])
+
+        m = folium.Map(location=[45.5, 25], zoom_start=6, tiles="OpenStreetMap")
+
+        for _, row in df.iterrows():
+            folium.CircleMarker(
+                location=(row["lat"], row["lon"]),
+                radius=6 + row["valoare_medie"] / df["valoare_medie"].max() * 18,
+                popup=(
+                    f"<b>{row['oras']}</b><br>"
+                    f"Valoare medie comandă: {row['valoare_medie']} RON<br>"
+                    f"Nr. comenzi: {row['nr_comenzi']}"
+                ),
+                color="darkblue",
+                fill=True,
+                fill_color="blue",
+                fill_opacity=0.6
+            ).add_to(m)
+
+        st_folium(m, width=900, height=550)
+        st.dataframe(df)
+        export_downloads(df, "harta_valoare_medie_comanda")
+
+        if st.button("Export hartă HTML – valoare medie"):
+            m.save("harta_valoare_medie_comanda.html")
+            st.success("Harta a fost salvată ca harta_valoare_medie_comanda.html")
 
 # =========================
 # 12) Donut Chart genuri muzicale
