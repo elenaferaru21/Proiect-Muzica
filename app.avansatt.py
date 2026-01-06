@@ -601,21 +601,30 @@ elif view == "Hartă valoare medie comandă (clienți)":
         df["lat"] = df["oras"].map(lambda x: coordonate.get(x, (45, 25))[0])
         df["lon"] = df["oras"].map(lambda x: coordonate.get(x, (45, 25))[1])
 
+        # 🔧 NORMALIZARE MIN–MAX pentru raze vizibile
+        min_val = df["valoare_medie"].min()
+        max_val = df["valoare_medie"].max()
+
+        if min_val == max_val:
+            df["radius"] = 12
+        else:
+            df["radius"] = 8 + (df["valoare_medie"] - min_val) / (max_val - min_val) * 22
+
         m = folium.Map(location=[45.5, 25], zoom_start=6, tiles="OpenStreetMap")
 
         for _, row in df.iterrows():
             folium.CircleMarker(
                 location=(row["lat"], row["lon"]),
-                radius=6 + row["valoare_medie"] / df["valoare_medie"].max() * 18,
+                radius=row["radius"],
                 popup=(
                     f"<b>{row['oras']}</b><br>"
-                    f"Valoare medie comandă: {row['valoare_medie']} RON<br>"
+                    f"Valoare medie comandă: <b>{row['valoare_medie']} RON</b><br>"
                     f"Nr. comenzi: {row['nr_comenzi']}"
                 ),
                 color="darkblue",
                 fill=True,
                 fill_color="blue",
-                fill_opacity=0.6
+                fill_opacity=0.7
             ).add_to(m)
 
         st_folium(m, width=900, height=550)
